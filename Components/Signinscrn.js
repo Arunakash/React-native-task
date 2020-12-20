@@ -34,8 +34,20 @@ class Signinscrn extends Component {
     });
     //Check if user is already signed in
     this._isSignedIn();
+    
+    const APIKEY ={
+      TWITTER_API_KEY : 'dPeI8sKykRuWeeFTx60g8l0ZO',
+      TWITTER_SECRET_KEY :'8ZstsMkGULO2tcS7NWQ3AI8vp2VmBCxYVTNJRTNBFQayq7f4Mc'
+    }
   }
-
+  TwitterLogin =() =>{
+    RNTwitterSingin.init(APIKEY.TWITTER_API_KEY, APIKEY.TWITTER_SECRET_KEY)
+    RNTwitterSingin.login().then(loginData =>{
+      console.log("loginData  ",loginData)
+    }).catch.log(error =>{
+      console.log("error",error)
+    })
+   }
   _isSignedIn = async () => {
     const isSignedIn = await GoogleSignin.isSignedIn();
     if (isSignedIn) {
@@ -206,7 +218,7 @@ render(){
            </View>
          </TouchableHighlight>
              
-         <TouchableHighlight onPress={this._signIn}   underlayColor="#66ccff" style={[styles.button,{height:40},{width:310},{borderWidth:0},{marginTop:15,backgroundColor:"#00acee",justifyContent:"center",borderColor:'transparent'}]}>
+         <TouchableHighlight onPress={this.TwitterLogin}   underlayColor="#66ccff" style={[styles.button,{height:40},{width:310},{borderWidth:0},{marginTop:15,backgroundColor:"#00acee",justifyContent:"center",borderColor:'transparent'}]}>
          <View style={{flexDirection:'row',alignItems:"center",width:'100%'}}>
          <Image style={{height:25,width:25,marginRight:10,left:11}} resizeMode ='contain' source={require('../assets/twit-whi.png')}></Image>
            <Text style={styles.signupTextNew}>Sign-in with Twitter</Text>
