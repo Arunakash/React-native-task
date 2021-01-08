@@ -3,13 +3,13 @@ import { StyleSheet, Text, ScrollView,StatusBar,View, Image, TouchableOpacity, B
 import LinearGradient from 'react-native-linear-gradient';
 import { withNavigation } from 'react-navigation';
 
+
 const devicewidth = Dimensions.get('window').width;
 const deviceheight= Dimensions.get('window').height;
 
-
 class Signupscrn extends Component{
   constructor(){
-    super();
+    super(); 
     this.state ={
         username:"",
         useremail:"",

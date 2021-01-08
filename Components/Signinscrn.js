@@ -1,13 +1,26 @@
 import React,{Component} from 'react';
-import { SafeAreaView,StyleSheet,ScrollView,Image,View,Text,StatusBar,TextInput,Button,TouchableHighlight,TouchableOpacity,Dimensions,ImageBackground,ActivityIndicator,Alert} from 'react-native';
+import { SafeAreaView,StyleSheet,ScrollView,Image,View,Text,StatusBar,TextInput,Button,TouchableHighlight,TouchableOpacity,Dimensions,ImageBackground,NativeModules,Alert} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import *as firebase from 'firebase';
 import { LoginManager, AccessToken,LoginButton ,GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
 import {GoogleSignin,GoogleSigninButton,statusCodes} from 'react-native-google-signin';
 import { withNavigation } from 'react-navigation';
 
+const  {RNTwitterSignIn} = NativeModules;
 const devicewidth = Dimensions.get('window').width;
 const deviceheight= Dimensions.get('window').height;
+
+const APIKEY = {
+  TWITTER_API_KEY : "dPeI8sKykRuWeeFTx60g8l0ZO",
+  TWITTER_SECRET_KEY : "8ZstsMkGULO2tcS7NWQ3AI8vp2VmBCxYVTNJRTNBFQayq7f4Mc"
+}
+
+const twitterLogin =() =>{
+  RNTwitterSignIn.init(APIKEY.TWITTER_API_KEY,APIKEY.TWITTER_SECRET_KEY)
+  RNTwitterSignIn.logIn().then(loginData =>{
+   console.log("loginData :",loginData)
+  }).catch(err =>{console.log(err)}) 
+}
 
 class Signinscrn extends Component {
   constructor(props){
@@ -218,7 +231,7 @@ render(){
            </View>
          </TouchableHighlight>
              
-         <TouchableHighlight onPress={this.TwitterLogin}   underlayColor="#66ccff" style={[styles.button,{height:40},{width:310},{borderWidth:0},{marginTop:15,backgroundColor:"#00acee",justifyContent:"center",borderColor:'transparent'}]}>
+         <TouchableHighlight onPress={twitterLogin}   underlayColor="#66ccff" style={[styles.button,{height:40},{width:310},{borderWidth:0},{marginTop:15,backgroundColor:"#00acee",justifyContent:"center",borderColor:'transparent'}]}>
          <View style={{flexDirection:'row',alignItems:"center",width:'100%'}}>
          <Image style={{height:25,width:25,marginRight:10,left:11}} resizeMode ='contain' source={require('../assets/twit-whi.png')}></Image>
            <Text style={styles.signupTextNew}>Sign-in with Twitter</Text>
