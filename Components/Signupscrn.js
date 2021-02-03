@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
-import { StyleSheet, Text, ScrollView,StatusBar,View, Image, TouchableOpacity, Button, ActivityIndicator,Dimensions, TextInput, Alert } from 'react-native';
+import { StyleSheet, Text, ScrollView,StatusBar,View, Image, TouchableOpacity, Button, ActivityIndicator,Dimensions, TextInput, Alert,LogBox } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { withNavigation } from 'react-navigation';
-
-
+import {messageService} from './dataservice';
+import Toast from 'react-native-custom-toast';
 const devicewidth = Dimensions.get('window').width;
 const deviceheight= Dimensions.get('window').height;
 
@@ -20,6 +20,8 @@ class Signupscrn extends Component{
     StatusBar.setBarStyle( 'light-content',true)
     StatusBar.setBackgroundColor("transparent")
     StatusBar.setTranslucent(true)
+    LogBox.ignoreLogs(['Animated: `useNativeDriver`']);
+  
   }
   _submit = (text) =>{
     var isEmailValid = false;
@@ -37,8 +39,13 @@ class Signupscrn extends Component{
     if(this.state.useremail !="" && this.state.userpassword !="" && this.state.username !=""){
       if(isEmailValid){
      
-       Alert.alert("Registered sucessfully"),[{text:'okay'}]
-       this.props.navigation.navigate("Signinscrn");
+       // Alert.alert("Registered sucessfully"),[{text:'okay'}]
+       messageService.sendMessage({usnme:this.state.username,pwd:this.state.userpassword});
+       this.showCustomToast();
+       setTimeout(() => {
+      
+      this.props.navigation.navigate("Signinscrn");
+       },800)
       }
        else{
       
@@ -50,11 +57,14 @@ class Signupscrn extends Component{
       Alert.alert('Try again',"Please fill required feilds"),[{text:'okay'}]
     }
   }
+
+  showCustomToast()
+  {
+    this.refs.customToast.showToast('Registered Successfully !', 800);
+  }
   render(){
     
     return( 
-     
-    
     <ScrollView style={{backgroundColor:'#364B5f'}}>
        
     <View style={styles.container}>
@@ -101,7 +111,10 @@ class Signupscrn extends Component{
             <Text style={{bottom:4,fontSize:14,color:'#d4d2d2'}}>Already have an account?<Text style={{fontWeight:'bold',color:'#0d2ad4'}}> SignIn</Text></Text>
           </View>
           </TouchableOpacity>
+         
      </View>
+     
+     <Toast ref = "customToast" backgroundColor = "#28a745" position = "bottom"/>
     </ScrollView>
     );
   }

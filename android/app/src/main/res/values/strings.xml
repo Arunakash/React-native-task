@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Awesomefblogin</string>
+    <string name="app_name">demo App</string>
    <string name="facebook_app_id">128798362122765</string>
  <string name="fb_login_protocol_scheme">fb128798362122765</string>
 

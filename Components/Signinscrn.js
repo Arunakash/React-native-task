@@ -1,11 +1,12 @@
 import React,{Component} from 'react';
-import { SafeAreaView,StyleSheet,ScrollView,Image,View,Text,StatusBar,TextInput,Button,TouchableHighlight,TouchableOpacity,Dimensions,ImageBackground,NativeModules,Alert} from 'react-native';
+import { SafeAreaView,StyleSheet,ScrollView,Image,View,Text,StatusBar,TextInput,ActivityIndicator,
+  TouchableHighlight,TouchableOpacity,Dimensions,ImageBackground,NativeModules,Alert} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import *as firebase from 'firebase';
 import { LoginManager, AccessToken,LoginButton ,GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
 import {GoogleSignin,GoogleSigninButton,statusCodes} from 'react-native-google-signin';
 import { withNavigation } from 'react-navigation';
-
+import{messageService} from './dataservice';
 const  {RNTwitterSignIn} = NativeModules;
 const devicewidth = Dimensions.get('window').width;
 const deviceheight= Dimensions.get('window').height;
@@ -14,14 +15,8 @@ const APIKEY = {
   TWITTER_API_KEY : "dPeI8sKykRuWeeFTx60g8l0ZO",
   TWITTER_SECRET_KEY : "8ZstsMkGULO2tcS7NWQ3AI8vp2VmBCxYVTNJRTNBFQayq7f4Mc"
 }
-
-const twitterLogin =() =>{
-  RNTwitterSignIn.init(APIKEY.TWITTER_API_KEY,APIKEY.TWITTER_SECRET_KEY)
-  RNTwitterSignIn.logIn().then(loginData =>{
-   console.log("loginData :",loginData)
-  }).catch(err =>{console.log(err)}) 
-}
-
+ var name ="";
+ var paswed="";
 class Signinscrn extends Component {
   constructor(props){
     super(props);
@@ -30,15 +25,27 @@ class Signinscrn extends Component {
       UserNameTxt:null,
       passWordTxt:null,
       gettingLoginStatus: true,
+      animating:false
     };
   }  
 
   componentDidMount() {
+    this.setState({animating:false})
+
+    this.subscription = messageService.getMessage().subscribe(message => {
+     
+      if(message){
+        name = message.text.usnme;
+        paswed = message.text.pwd;
+      }
+  });
     //initial configuration <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true}/>
     StatusBar.setBarStyle( 'light-content',true)
     StatusBar.setBackgroundColor("transparent")
     StatusBar.setTranslucent(true)
-
+    
+   // LoginManager.logOut();
+   
     GoogleSignin.configure({
       //It is mandatory to call this method before attempting to call signIn()
       scopes: ['https://www.googleapis.com/auth/drive.readonly'],
@@ -53,14 +60,13 @@ class Signinscrn extends Component {
       TWITTER_SECRET_KEY :'8ZstsMkGULO2tcS7NWQ3AI8vp2VmBCxYVTNJRTNBFQayq7f4Mc'
     }
   }
-  TwitterLogin =() =>{
-    RNTwitterSingin.init(APIKEY.TWITTER_API_KEY, APIKEY.TWITTER_SECRET_KEY)
-    RNTwitterSingin.login().then(loginData =>{
-      console.log("loginData  ",loginData)
-    }).catch.log(error =>{
-      console.log("error",error)
-    })
-   }
+    twitterLogin =() =>{
+    RNTwitterSignIn.init(APIKEY.TWITTER_API_KEY,APIKEY.TWITTER_SECRET_KEY)
+    RNTwitterSignIn.logIn().then(loginData =>{
+     console.log("loginData :",loginData)
+     this.props.navigation.navigate("home");
+    }).catch(err =>{console.log(err)}) 
+  }
   _isSignedIn = async () => {
     const isSignedIn = await GoogleSignin.isSignedIn();
     if (isSignedIn) {
@@ -80,6 +86,10 @@ class Signinscrn extends Component {
       const userInfo = await GoogleSignin.signInSilently();
       console.log('User Info --> ', userInfo);
       this.setState({ userInfo: userInfo });
+     if(userInfo){
+       
+      this.props.navigation.navigate("home");
+     }
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_REQUIRED) {
         alert('User has not signed in yet');
@@ -127,27 +137,30 @@ class Signinscrn extends Component {
   };
 
   _submit = async ()=>{
-   // Alert.alert('Info',this.state.UserNameTxt+"  "+this.state.passWordTxt),[{text:'okay'}]
-    if(this.state.UserNameTxt != null && this.state.passWordTxt != null){
-     
-      Alert.alert('Info',"login sucessfully"),[{text:'okay'}]
-      this.setState({})
-      this.setState({UserNameTxt:null,passWordTxt:null})
+   
+    if(this.state.UserNameTxt === name && this.state.passWordTxt ===paswed){
+    this.setState({animating:true})
+      setTimeout( () => {
+        this.props.navigation.replace('home',{name:name});
+        this.setState({UserNameTxt:null,passWordTxt:null})
+      }, 2000);
       
     }
     else{
+      this.setState({UserNameTxt:null,passWordTxt:null})
       Alert.alert('Info',"Please enter vaild username or password"),[{text:'okay'}]
     }
+      console.log(name,paswed)
   }
 render(){
     return (
       
         <View style={[styles.container]}>
-      <ImageBackground source={require('../assets/bcgrnd2.png')} style={{width:"100%"}}>
+      <ImageBackground source={require('../assets/bcgrnd2.png')} style={{height:"100%",width:"100%"}}>
     
 
       <ScrollView style={{width:"100%"}}>
-        <View style={{height:720,width:"100%",alignItems:"center",marginTop:40}}>
+        <View style={{height:deviceheight,width:"100%",alignItems:"center",marginTop:40}}>
           <View style={styles.imageContainer}>
            
             <Image style={styles.image} resizeMode ='contain' source={require('../assets/image.png')}></Image>
@@ -194,6 +207,13 @@ render(){
           >
               <Text style={styles.buttonTextSingup,[{color:'#f2ebeb'}]}>Forgot your login details?Get help signing in.</Text>
             </TouchableHighlight>
+
+            <ActivityIndicator
+               animating = {this.state.animating}
+               color = '#00acee'
+               size = "large"
+               />
+
             {/* <TouchableHighlight  style={styles.buttonSignup}
               underlayColor={'transparent'}
             onPress={() =>{
@@ -202,7 +222,7 @@ render(){
             >
             <Text style={[styles.buttonTextSingup],{color:'#6D6E70'}}>Don't have account?Click here</Text>
             </TouchableHighlight> */}
-           <View style={{flexDirection: 'row', alignItems: 'center',marginTop:45}}>
+           <View style={{flexDirection: 'row', alignItems: 'center',marginTop:0}}>
                <View style={{flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.4)'}} />
                <View>
                   <Text style={{width: 50, textAlign: 'center',color:'white'}}>OR</Text>
@@ -231,7 +251,7 @@ render(){
            </View>
          </TouchableHighlight>
              
-         <TouchableHighlight onPress={twitterLogin}   underlayColor="#66ccff" style={[styles.button,{height:40},{width:310},{borderWidth:0},{marginTop:15,backgroundColor:"#00acee",justifyContent:"center",borderColor:'transparent'}]}>
+         <TouchableHighlight onPress={this.twitterLogin}   underlayColor="#66ccff" style={[styles.button,{height:40},{width:310},{borderWidth:0},{marginTop:15,backgroundColor:"#00acee",justifyContent:"center",borderColor:'transparent'}]}>
          <View style={{flexDirection:'row',alignItems:"center",width:'100%'}}>
          <Image style={{height:25,width:25,marginRight:10,left:11}} resizeMode ='contain' source={require('../assets/twit-whi.png')}></Image>
            <Text style={styles.signupTextNew}>Sign-in with Twitter</Text>
@@ -425,7 +445,7 @@ _responseInfoCallback = (error, result) => {
   if (error) {
     alert('Error fetching data: ' + error.toString());
   } else {
-   
+  
 console.log(result.email,result.id,result.name)
   }
 }
